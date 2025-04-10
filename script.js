@@ -13,7 +13,8 @@ let playerSolved = false;
 let opponentSolved = false;
 let opponentTime = 0;
 let pollingInterval; // Biến để lưu trữ interval cho việc polling
-
+let gridSizeSelect;
+let difficultySelect;
 // URL API backend
 const API_URL = "https://sudoku-backend-1.onrender.com";
 
@@ -605,142 +606,167 @@ document.addEventListener('DOMContentLoaded', function() {
   // Khởi tạo phần multiplayer sau khi trang đã tải
   initializeMultiplayer();
 });
+
+// Khởi tạo mảng chứa 50 lưới Sudoku đã tạo sẵn
+let sudokuGrids = [];
+let currentSudokuIndex = 0; // Lưu trữ chỉ số của lưới Sudoku hiện tại
+
 // Khởi tạo phần tử DOM
-const sudokuGrid = document.getElementById('sudokuGrid');
-const gridSizeSelect = document.getElementById('gridSize');
-const difficultySelect = document.getElementById('difficulty');
-const generateBtn = document.getElementById('generateBtn');
-const solveBtn = document.getElementById('solveBtn');
-const clearBtn = document.getElementById('clearBtn');
-const clearAllBtn = document.getElementById('clearAllBtn'); // Thêm nút Clear All
-const createGridBtn = document.getElementById('createGridBtn'); // Nút tạo lưới nhập
+document.addEventListener('DOMContentLoaded', function() {
+    const sudokuGrid = document.getElementById('sudokuGrid');
+    gridSizeSelect = document.getElementById('gridSize');
+    difficultySelect = document.getElementById('difficulty');
+    const generateBtn = document.getElementById('generateBtn');
+    const solveBtn = document.getElementById('solveBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const createGridBtn = document.getElementById('createGridBtn');
+    const gridSizeValueSpan = document.getElementById('gridSizeValue');
+    const checkBtn = document.getElementById('checkBtn');
 
-// Thêm biến cho chức năng đếm thời gian chơi đơn
-let singlePlayerTimer = 0;
-let singlePlayerTimerInterval;
-let singlePlayerTimerRunning = false;
-const timerDisplay = document.createElement('div');
-timerDisplay.id = 'timerDisplay';
-timerDisplay.className = 'timer-display';
-timerDisplay.textContent = '00:00';
-
-// Tạo nút điều khiển đồng hồ
-const timerButton = document.createElement('button');
-timerButton.id = 'timerBtn';
-timerButton.textContent = 'Bắt đầu đếm giờ';
-timerButton.className = 'control-button';
-
-// Thêm nút đếm giờ vào gần nút Tools
-const toolsBtn = document.querySelector('.tools-button') || document.getElementById('toolsBtn');
-if (toolsBtn && toolsBtn.parentNode) {
-    toolsBtn.parentNode.insertBefore(timerButton, toolsBtn.nextSibling);
-    // Thêm hiển thị thời gian phía trên nút
-    toolsBtn.parentNode.insertBefore(timerDisplay, timerButton);
-}
-
-// Hàm bắt đầu đếm thời gian cho chế độ chơi đơn
-function startSinglePlayerTimer() {
-    if (singlePlayerTimerRunning) return;
-    
-    singlePlayerTimer = 0;
-    singlePlayerTimerRunning = true;
-    timerButton.textContent = 'Dừng đếm giờ';
-    
-    singlePlayerTimerInterval = setInterval(() => {
-        singlePlayerTimer++;
-        timerDisplay.textContent = formatTime(singlePlayerTimer);
-    }, 1000);
-}
-
-// Hàm dừng đếm thời gian cho chế độ chơi đơn
-function stopSinglePlayerTimer() {
-    if (!singlePlayerTimerRunning) return;
-    
-    clearInterval(singlePlayerTimerInterval);
-    singlePlayerTimerRunning = false;
-    timerButton.textContent = 'Bắt đầu đếm giờ';
-}
-
-// Hàm reset đồng hồ
-function resetSinglePlayerTimer() {
-    stopSinglePlayerTimer();
-    singlePlayerTimer = 0;
+    // Thêm biến cho chức năng đếm thời gian chơi đơn
+    let singlePlayerTimer = 0;
+    let singlePlayerTimerInterval;
+    let singlePlayerTimerRunning = false;
+    const timerDisplay = document.createElement('div');
+    timerDisplay.id = 'timerDisplay';
+    timerDisplay.className = 'timer-display';
     timerDisplay.textContent = '00:00';
-}
 
-// Thêm sự kiện cho nút đếm giờ
-timerButton.addEventListener('click', () => {
-    if (singlePlayerTimerRunning) {
+    // Tạo nút điều khiển đồng hồ
+    const timerButton = document.createElement('button');
+    timerButton.id = 'timerBtn';
+    timerButton.textContent = 'Bắt đầu đếm giờ';
+    timerButton.className = 'control-button';
+
+    // Thêm nút đếm giờ vào gần nút Tools
+    const toolsBtn = document.querySelector('.tools-button') || document.getElementById('toolsBtn');
+    if (toolsBtn && toolsBtn.parentNode) {
+        toolsBtn.parentNode.insertBefore(timerButton, toolsBtn.nextSibling);
+        // Thêm hiển thị thời gian phía trên nút
+        toolsBtn.parentNode.insertBefore(timerDisplay, timerButton);
+    }
+
+    // Hàm bắt đầu đếm thời gian cho chế độ chơi đơn
+    function startSinglePlayerTimer() {
+        if (singlePlayerTimerRunning) return;
+        
+        singlePlayerTimer = 0;
+        singlePlayerTimerRunning = true;
+        timerButton.textContent = 'Dừng đếm giờ';
+        
+        singlePlayerTimerInterval = setInterval(() => {
+            singlePlayerTimer++;
+            timerDisplay.textContent = formatTime(singlePlayerTimer);
+        }, 1000);
+    }
+
+    // Hàm dừng đếm thời gian cho chế độ chơi đơn
+    function stopSinglePlayerTimer() {
+        if (!singlePlayerTimerRunning) return;
+        
+        clearInterval(singlePlayerTimerInterval);
+        singlePlayerTimerRunning = false;
+        timerButton.textContent = 'Bắt đầu đếm giờ';
+    }
+
+    // Hàm reset đồng hồ
+    function resetSinglePlayerTimer() {
         stopSinglePlayerTimer();
-    } else {
-        startSinglePlayerTimer();
+        singlePlayerTimer = 0;
+        timerDisplay.textContent = '00:00';
+    }
+
+    // Thêm sự kiện cho nút đếm giờ
+    timerButton.addEventListener('click', () => {
+        if (singlePlayerTimerRunning) {
+            stopSinglePlayerTimer();
+        } else {
+            startSinglePlayerTimer();
+        }
+    });
+
+    // Thêm CSS cho timer
+    const timerStyles = document.createElement('style');
+    timerStyles.innerHTML = `
+        .timer-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+            color: #333;
+        }
+        
+        #timerBtn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        #timerBtn:hover {
+            background-color: #45a049;
+        }
+    `;
+    document.head.appendChild(timerStyles);
+
+    // Sự kiện cho nút kiểm tra đáp án
+    if (checkBtn) {
+        checkBtn.addEventListener('click', () => {
+            const size = parseInt(gridSizeSelect.value);
+            const grid = getGridData(size);
+            const isCorrect = checkSudokuSolution(grid, size);
+
+            if (isCorrect) {
+                alert("Chính xác! Thời gian của bạn: " + timerDisplay.textContent);
+                stopSinglePlayerTimer();
+            } else {
+                alert("Sai rồi!");
+            }
+        });
+    }
+
+    // Nút để tạo lưới nhập
+    if (createGridBtn) {
+        createGridBtn.addEventListener('click', () => {
+            const size = parseInt(gridSizeSelect.value);
+            createSudokuGrid(size);
+            const sudokuInputArea = document.getElementById('sudokuInputArea');
+            if (sudokuInputArea) {
+                sudokuInputArea.style.display = 'block';
+            }
+        });
+    }
+
+    // Cập nhật giá trị của phần tử gridSizeValue
+    if (gridSizeSelect && gridSizeValueSpan) {
+        gridSizeSelect.addEventListener('change', function() {
+            gridSizeValueSpan.textContent = gridSizeSelect.value;
+        });
+    }
+
+    // Thêm event listener cho các nút khác
+    if (generateBtn) {
+        generateBtn.addEventListener('click', () => {
+            const size = parseInt(gridSizeSelect.value);
+            const difficulty = difficultySelect.value;
+            generateMultipleSudoku(size, difficulty);
+            resetSinglePlayerTimer();
+        });
+    }
+
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', () => {
+            resetSinglePlayerTimer();
+        });
     }
 });
-
-// Thêm CSS cho timer
-const timerStyles = document.createElement('style');
-timerStyles.innerHTML = `
-    .timer-display {
-        font-size: 24px;
-        font-weight: bold;
-        margin: 10px 0;
-        text-align: center;
-        color: #333;
-    }
-    
-    #timerBtn {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        margin: 5px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-    
-    #timerBtn:hover {
-        background-color: #45a049;
-    }
-`;
-document.head.appendChild(timerStyles);
-
-// Kết nối chức năng đếm giờ với các nút khác
-generateBtn.addEventListener('click', () => {
-    // Giữ lại code cũ
-    const size = parseInt(gridSizeSelect.value);
-    const difficulty = difficultySelect.value;
-    generateMultipleSudoku(size, difficulty);
-    
-    // Thêm: Reset đồng hồ khi tạo lưới mới
-    resetSinglePlayerTimer();
-});
-
-// Kết nối với nút Clear All
-clearAllBtn.addEventListener('click', () => {
-    // Reset đồng hồ khi xóa tất cả
-    resetSinglePlayerTimer();
-});
-
-// Kết nối với nút kiểm tra đáp án
-document.getElementById('checkBtn').addEventListener('click', () => {
-    const size = parseInt(document.getElementById('gridSize').value);
-    const grid = getGridData(size);
-    const isCorrect = checkSudokuSolution(grid, size);
-
-    if (isCorrect) {
-        alert("Chính xác! Thời gian của bạn: " + timerDisplay.textContent);
-        stopSinglePlayerTimer();
-    } else {
-        alert("Sai rồi!");
-    }
-});
-  
 
 // Mảng chứa 50 lưới Sudoku đã tạo sẵn
-let sudokuGrids = [];
-
-let currentSudokuIndex = 0; // Lưu trữ chỉ số của lưới Sudoku hiện tại
 
 // Tạo lưới Sudoku với kích thước tùy chọn và kích thước ô phù hợp
 function createSudokuGrid(size) {
@@ -917,13 +943,6 @@ function generateMultipleSudoku(size, difficulty) {
     displaySudokuGrid(sudokuGrids[currentSudokuIndex], size);
 }
 
-// Sự kiện cho nút tạo Sudoku
-generateBtn.addEventListener('click', () => {
-    const size = parseInt(gridSizeSelect.value);
-    const difficulty = difficultySelect.value;
-    generateMultipleSudoku(size, difficulty);
-});
-
 // Sự kiện cho nút giải Sudoku từ lưới hiện tại
 solveBtn.addEventListener('click', () => {
     const size = parseInt(gridSizeSelect.value);
@@ -1021,32 +1040,116 @@ function checkSudokuSolution(grid, size) {
     }
     return true;
 }
+// Hàm tạo bản sao của mảng 2 chiều
+function cloneGrid(grid) {
+  return grid.map(row => row.slice());
+}
 
-// Sự kiện cho nút kiểm tra đáp án
+// Hàm kiểm tra và đánh dấu các ô lỗi
+function checkAndHighlightSolution(grid, size) {
+  let hasError = false;
+  // Hàm kiểm tra tính hợp lệ của số tại ô (không so sánh với chính nó)
+  const isValidCell = (row, col, num) => {
+      for (let x = 0; x < size; x++) {
+          if (x !== col && grid[row][x] === num) return false;
+          if (x !== row && grid[x][col] === num) return false;
+      }
+      const subgridSize = Math.sqrt(size);
+      const startRow = row - row % subgridSize;
+      const startCol = col - col % subgridSize;
+      for (let i = 0; i < subgridSize; i++) {
+          for (let j = 0; j < subgridSize; j++) {
+              if ((startRow + i !== row || startCol + j !== col) &&
+                  grid[startRow + i][startCol + j] === num) return false;
+          }
+      }
+      return true;
+  };
+  // Duyệt qua từng ô trong grid
+  for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+          const cellElement = document.getElementById(`cell-${i}-${j}`);
+          const value = cellElement.value;
+          // Nếu ô trống, đánh dấu lỗi
+          if (value === '') {
+              cellElement.style.backgroundColor = 'red';
+              hasError = true;
+          } else {
+              const num = parseInt(value);
+              if (!isValidCell(i, j, num)) {
+                  cellElement.style.backgroundColor = 'red';
+                  hasError = true;
+              } else {
+                  // Nếu ô đúng, có thể giữ màu vàng (hoặc đặt lại màu mặc định nếu cần)
+                  cellElement.style.backgroundColor = 'yellow';
+              }
+          }
+      }
+  }
+  return hasError;
+}
+
+// Ghi đè sự kiện kiểm tra đáp án với phiên bản mới có đánh dấu lỗi và tính điểm
 document.getElementById('checkBtn').addEventListener('click', () => {
-    const size = parseInt(document.getElementById('gridSize').value);
-    const grid = getGridData(size);  // Giả sử bạn có hàm getGridData để lấy dữ liệu lưới Sudoku hiện tại
-    const isCorrect = checkSudokuSolution(grid, size);
-
-    if (isCorrect) {
-        alert("Chính xác!");
-    } else {
-        alert("Sai rồi!");
-    }
+  const size = parseInt(document.getElementById('gridSize').value);
+  const grid = getGridData(size);
+  const hasError = checkAndHighlightSolution(grid, size);
+  if (!hasError) {
+      clearInterval(timerInterval); // Dừng đếm thời gian
+      const score = calculateScore(); // Tính điểm
+      const scoreElement = document.getElementById('score');
+      scoreElement.textContent = score; // Hiển thị điểm trên giao diện
+      scoreElement.style.display = 'block'; // Hiển thị phần tử điểm
+      scoreElement.innerHTML = `<strong>Điểm của bạn: ${score}</strong>`;
+      alert(`🎉 Chính xác! Bạn đạt ${score} điểm.`);
+  } else {
+      alert("❌ Sai rồi! Các ô sai đã được đánh dấu màu đỏ.");
+  }
 });
 
-// Nút để tạo lưới nhập
-createGridBtn.addEventListener('click', () => {
-    const size = parseInt(gridSizeSelect.value); // Lấy kích thước lưới hiện tại
-    createSudokuGrid(size); // Tạo lưới
-    document.getElementById('sudokuInputArea').style.display = 'block'; // Hiện thị vùng nhập liệu
-});
+// Hàm gợi ý nước đi cho một ô trống
+function giveHint() {
+  const size = parseInt(gridSizeSelect.value);
+  const grid = getGridData(size);
+  // Tạo bản sao của grid để giải mà không ảnh hưởng đến grid hiện tại
+  const gridCopy = cloneGrid(grid);
+  // Giải sudoku trên gridCopy
+  if (!solveSudoku(gridCopy, size)) {
+      alert("Không thể tìm lời giải cho lưới hiện tại!");
+      return;
+  }
+  // Tìm một ô trống trong grid ban đầu và thay bằng số từ gridCopy
+  let hintGiven = false;
+  for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+          const cell = document.getElementById(`cell-${i}-${j}`);
+          if (cell.value === '') { // Nếu ô trống thì đưa gợi ý
+              cell.value = gridCopy[i][j];
+              cell.style.backgroundColor = 'lightgreen'; // Màu để nhận biết là gợi ý
+              hintGiven = true;
+              return; // Chỉ gợi ý một ô mỗi lần bấm
+          }
+      }
+  }
+  if (!hintGiven) {
+      alert("Lưới đã đầy, không có ô trống để gợi ý!");
+  }
+}
 
-// Cập nhật giá trị của phần tử gridSizeValue khi thay đổi kích thước lưới
+// Thêm sự kiện cho nút gợi ý nếu có
 document.addEventListener('DOMContentLoaded', function() {
-    const gridSizeValueSpan = document.getElementById('gridSizeValue');
-
-    gridSizeSelect.addEventListener('change', function() {
-        gridSizeValueSpan.textContent = gridSizeSelect.value;
-    });
+  // Kiểm tra xem nút hint có tồn tại không
+  const hintBtn = document.getElementById('hintBtn');
+  if (hintBtn) {
+      hintBtn.addEventListener('click', giveHint);
+  }
+  
+  // Kiểm tra nếu có nút createButton, thêm sự kiện startTimer
+  const createButton = document.getElementById('createButton');
+  if (createButton) {
+      createButton.addEventListener('click', () => {
+          createSudokuGrid(); // Hàm tạo Sudoku
+          startTimer(); // Bắt đầu đếm thời gian ngay khi lưới được tạo
+      });
+  }
 });
