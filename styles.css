@@ -1,0 +1,210 @@
+:root {
+    /* Màu chủ đạo */
+    --primary: #6366f1;
+    --secondary: #8b5cf6;
+    --accent: #ec4899;
+    
+    /* Màu nền */
+    --bg-dark: #0f172a;
+    --bg-darker: #020617;
+    --bg-light: #1e293b;
+    
+    /* Màu text */
+    --text-primary: #1288e2;
+    --text-secondary: #116606;
+    --text-accent: #000000;
+    
+    /* Màu button */
+    --btn-generate: #10b981;
+    --btn-create: #8b5cf6;
+    --btn-check: #f59e0b;
+    --btn-solve: #3b82f6;
+}
+
+/* Reset và Base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* Header Styles */
+h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 3rem;
+    text-align: center;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+    to {
+        text-shadow: 0 0 30px rgba(139, 92, 246, 0.8);
+    }
+}
+
+/* Controls Section */
+#controls {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+/* Select Styles */
+select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+select:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+}
+
+/* Button Styles */
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#generateBtn {
+    background: linear-gradient(135deg, var(--btn-generate), #059669);
+    color: #1b4b97;
+}
+
+#createGridBtn {
+    background: linear-gradient(135deg, var(--btn-create), #7c3aed);
+    color: #1b4b97;
+}
+
+#checkBtn {
+    background: linear-gradient(135deg, var(--btn-check), #d97706);
+    color: #1b4b97;
+}
+
+#solveBtn {
+    background: linear-gradient(135deg, var(--btn-solve), #2563eb);
+    color: #1b4b97;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Sudoku Grid */
+#sudokuGrid {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.sudoku-cell {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.sudoku-cell:focus {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+    outline: none;
+}
+
+/* Input Area */
+#sudokuInputArea {
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 2rem;
+}
+
+#sudokuInputArea h2 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+/* Tools Panel */
+#tools {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#tools summary {
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    #controls {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+    
+    .sudoku-cell {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    #tools {
+        position: static;
+        margin-top: 2rem;
+    }
+}
